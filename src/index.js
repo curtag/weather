@@ -3,13 +3,11 @@
 import './reset.css';
 import './style.css';
 import {
-  addSeconds, format,
+  addSeconds, format, parseISO,
 } from 'date-fns';
 import emoji from './emojiflag';
 
 function convertIconCode(iconCode) {
-  const container = document.getElementById('container');
-
   let faIconClass = '';
   switch (iconCode) {
     case '01d':
@@ -84,14 +82,14 @@ async function getWeatherXml(location, units = 'metric') {
     const iconCode = xmlDoc.getElementsByTagName('weather')[0].attributes.icon.value;
     const timeZoneOffset = xmlDoc.getElementsByTagName('timezone')[0].innerHTML;
     const country = emoji(xmlDoc.getElementsByTagName('country')[0].textContent);
-    const localTime = addSeconds(new Date(xmlDoc.getElementsByTagName('lastupdate')[0].attributes.value.value.split('T').join(' ')), timeZoneOffset);
+    // const localTime = addSeconds(new Date(xmlDoc.getElementsByTagName('lastupdate')[0].attributes.value.value.split('T').join(' ')), timeZoneOffset);
+    const localTime = addSeconds(parseISO(xmlDoc.getElementsByTagName('lastupdate')[0].attributes.value.value), timeZoneOffset);
     const date = format(localTime, 'E, LLLL d');
     const time = format(localTime, 'h:mm bbb');
     return {
       location, temperature, humidity, status, iconCode, date, time, country,
     };
   } catch (e) {
-    console.log(e);
     const icon = document.querySelector('.fa-spinner');
     const input = document.querySelector('.weather-location-input');
     icon.classList.replace('fa-spinner', 'fa-search-location');
@@ -164,7 +162,6 @@ function createTemperature(element, temperature) {
 function renderWeather(weatherObj) {
   const container = document.getElementById('container');
   if (weatherObj.iconCode.charAt(weatherObj.iconCode.length - 1) === 'd') {
-    // background-image: radial-gradient( circle farthest-corner at 10% 20%,  rgba(253,101,133,1) 0%, rgba(255,211,165,1) 90% );
     container.style.backgroundImage = 'radial-gradient( circle farthest-corner at 10% 20%,  rgba(208,89,109,1) 0%, rgba(231,156,118,1) 90% )';
   } else {
     container.style.backgroundImage = 'linear-gradient( 94.3deg,  rgba(26,33,64,1) 10.9%, rgba(81,84,115,1) 87.1% )';
